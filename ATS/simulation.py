@@ -2,6 +2,7 @@ import random
 import pygame
 import sys
 
+from passenger import Passenger
 from taxi import Taxi
 
 # Initialize Pygame 
@@ -31,6 +32,11 @@ GRID_COLOR = (80, 80, 80)
 # Background color (dark gray)
 BG_COLOR = (25, 25, 25)   
 
+# Taxi number
+TAXI_NUMBER = 10
+
+# Passenger Increment
+PASSENGER_NUMBER = 0
 
 # Create the window
 screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))  
@@ -50,20 +56,18 @@ zoom_sensitivity = 0.15
 
 # Starting Taxi array
 taxi_list: list[Taxi] =[]
-
-#! TESTING
-JUMP_TIMER_INTERVAL = 2.0
+passenger_list: list[Passenger] =[]
 
 # Generate Random Taxis
-for i in range(10):
-    temp = Taxi(random.randint(0,20000),random.randint(0,20000),(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
-    print(temp.get_current_position())
+for i in range(TAXI_NUMBER):
+    temp = Taxi(i)
+    print(temp.ID, temp.get_current_position())
     taxi_list.append(temp)
 
 
 # Timer for functions
 timer = 0.0
-
+NEW_PASSENGER_TIMER_INTERVAL = 5.0
 
 running = True
 while running:
@@ -163,24 +167,43 @@ while running:
                     if taxi.get_current_position() == (row, col):
                         rect_taxi = pygame.Rect(x, y, cell_size, cell_size)
                         pygame.draw.rect(screen, taxi.Color, rect_taxi)
+            
+            # Checks if the cell is a passenger and draws a circle
+            if cell_size >= 5:
+                for passenger in passenger_list: 
+                    if passenger.get_start_point() == (row,col):
+                        pygame.draw.circle(screen, passenger.Color, (x + cell_size // 2, y + cell_size // 2), cell_size // 2)
+            
+            # Checks if the cell is a passenger end point and draws a star
+            if cell_size >= 5:
+                for passenger in passenger_list: 
+                    if passenger.get_end_point() == (row,col):
+                        pygame.draw.polygon(        
+                            screen,
+                            passenger.Color,
+                            [
+                                (x + cell_size * 0.5, y),                    
+                                (x + cell_size * 0.6, y + cell_size * 0.35),
+                                (x + cell_size,       y + cell_size * 0.4),
+                                (x + cell_size * 0.7, y + cell_size * 0.65),
+                                (x + cell_size * 0.8, y + cell_size),
+                                (x + cell_size * 0.5, y + cell_size * 0.8),
+                                (x + cell_size * 0.2, y + cell_size),
+                                (x + cell_size * 0.3, y + cell_size * 0.65),
+                                (x,                   y + cell_size * 0.4),
+                                (x + cell_size * 0.4, y + cell_size * 0.35),
+                            ]
+                        )
 
+    # Creates a passenger every 20 seconds and also increments the id
+    if timer >= NEW_PASSENGER_TIMER_INTERVAL:        
+        passenger_test = Passenger(PASSENGER_NUMBER) # Creates a new passenger
+        passenger_list.append(passenger_test)
+        print("Que: ",len(passenger_list))
+        PASSENGER_NUMBER = PASSENGER_NUMBER + 1 # Id increment
+        timer -= NEW_PASSENGER_TIMER_INTERVAL  # subtract instead of reset to prevent drift
 
-    # Timer based functions
-    if timer >= JUMP_TIMER_INTERVAL:
-
-        #!TESTING 
-        temp = taxi_list[random.randint(0,9)]
-        row = int(temp.CurrentXPos)
-        col = int(temp.CurrentYPos)
-        row = max(0, min(GRID_SIZE-1, row))
-        col = max(0, min(GRID_SIZE-1, col))
-        cell_size = BASE_CELL_SIZE * zoom
-        camera_x = col * cell_size
-        camera_y = row * cell_size
-        print("jump")
-        timer -= JUMP_TIMER_INTERVAL  # subtract instead of reset to prevent drift
-
-    pygame.display.flip()  # Update screen
+    pygame.display.flip()  # Update screen 
 
 #Closes simulation
 pygame.quit()  
