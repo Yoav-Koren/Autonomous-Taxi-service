@@ -2,15 +2,15 @@ import random
 import math
 
 class Passenger:
-    def __init__(self,ID, StartXPos = None ,StartYPos = None,EndXPos = None,EndYPos = None,Color = None):
+    def __init__(self,ID, CurrentXPos = None ,CurrentYPos = None,EndXPos = None,EndYPos = None,Color = None):
         self.ID = ID
-        self.StartXPos = random.randint(0,20000)
-        self.StartYPos = random.randint(0,20000)
+        self.CurrentXPos = random.randint(0,20000)
+        self.CurrentYPos = random.randint(0,20000)
         self.Color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
         
         Max_Distance = random.randint(1,2000) # Generates a max distance for the end point
-        XDistanceDeviation = random.randint(-Max_Distance,Max_Distance) # Generates how much X Moves based on the starting max distance
-        Temp_XEndPoint = self.StartXPos - XDistanceDeviation # Stores the new End point X 
+        XDistanceDeviation = random.randint(-Max_Distance,Max_Distance) # Generates how much X Moves based on the Currenting max distance
+        Temp_XEndPoint = self.CurrentXPos - XDistanceDeviation # Stores the new End point X 
 
         if (Temp_XEndPoint) > 20000: # Checks if the new X end point is inside the grid if not, we store the overflow for when we move Y end point
             OverFlow = Temp_XEndPoint - 20000 # Overflow incase our new generated point is outside our grid system
@@ -25,7 +25,7 @@ class Passenger:
             Max_Distance = (Max_Distance - abs(XDistanceDeviation)) # We subtract the distance traveled on the X axis from the max distance traveled
 
         YDistanceDeviation = random.randint(-Max_Distance,Max_Distance)
-        Temp_YEndPoint = self.StartYPos - YDistanceDeviation
+        Temp_YEndPoint = self.CurrentYPos - YDistanceDeviation
 
         
         if (Temp_YEndPoint) > 20000: # Checks if the new X end point is inside the grid if not, we store the overflow for when we move Y end point
@@ -40,17 +40,15 @@ class Passenger:
             self.EndYPos = Temp_YEndPoint # We set the new end point as the one we calculated earlier
             Max_Distance = (Max_Distance - abs(YDistanceDeviation)) # We subtract the distance traveled on the X axis from the max distance traveled
         
-        print("start: ", self.StartXPos," ",self.StartYPos)
+        print("Current: ", self.CurrentXPos," ",self.CurrentYPos)
         print("end: ", self.EndXPos," ",self.EndYPos)
-        StartPoint = (self.StartXPos,self.StartYPos)
-        EndPoint = (self.EndXPos,self.EndYPos)
-        Distance_Traveled = int(math.dist(StartPoint,EndPoint)) # Calculates the distance between 2 points using \(d=\sqrt{(x_{2}-x_{1})^{2}+(y_{2}-y_{1})^{2}}\)
-        print("Distance To Destination: ",Distance_Traveled)
+        Manhatten_Distance = abs(self.CurrentXPos - self.EndXPos) + abs(self.CurrentYPos - self.EndYPos) # Calculates the distance based on manhatten formula 
+        print("Manhaten Distance: ",Manhatten_Distance)
 
 
 
         
-    def get_start_point(self):
-        return (self.StartXPos,self.StartYPos)
+    def get_current_point(self):
+        return (self.CurrentXPos,self.CurrentYPos)
     def get_end_point(self):
         return (self.EndXPos,self.EndYPos)
