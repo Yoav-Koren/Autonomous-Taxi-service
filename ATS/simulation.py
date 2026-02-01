@@ -75,12 +75,19 @@ ASSIGN_TAXI_TIMER_INTERVAL = 1.0
 DRIVE_TAXI_TIMER = 0.0
 DRIVE_TAXI_TIMER_INTERVAL = 1.0
 
+# Follow function
+DO_FOLLOW = True
+FOLLOW_ID = None
+FOLLOW_TAXI_TIMER = 0.0
+FOLLOW_TAXI_TIMER_INTERVAL = 1.0
+
 running = True
 while running:
     dt = clock.tick(60) / 1000.0 # Delta Time so events are fps driven not clock driven
     NEW_PASSENGER_TIMER += dt
     ASSIGN_TAXI_TIMER += dt
     DRIVE_TAXI_TIMER += dt
+    FOLLOW_TAXI_TIMER += dt
 
     # Events:
     for event in pygame.event.get():
@@ -114,6 +121,11 @@ while running:
         camera_y -= move
     if keys[pygame.K_s]:  # Move down
         camera_y += move
+    if keys[pygame.K_f]:  # Follow
+        DO_FOLLOW = True
+        FOLLOW_ID = int(input("Enter taxi id number: "))
+    if keys[pygame.K_g]:  # Un Follow
+        DO_FOLLOW = False
     if keys[pygame.K_x]:
         try:
             # Ask user for input in the console
@@ -241,6 +253,7 @@ while running:
             for taxi in taxi_list:
                 if taxi.has_passenger_assigned() == False:
                     empty_taxi_list.append(taxi) # Creates and adds all empty taxis to the list because we dont need to calculate the distance to occupied taxis
+            print("Que: ",len(passenger_que))
             print("Empty Taxis: ",len(empty_taxi_list))
             if len(empty_taxi_list) > 0: 
                 closest_taxi:Taxi  = empty_taxi_list[0] # Stores the closest taxi as the first one just so i dont have to deal with Null
@@ -266,6 +279,20 @@ while running:
         for taxi in taxi_list:
             taxi.drive()
         DRIVE_TAXI_TIMER -= DRIVE_TAXI_TIMER_INTERVAL 
+
+    if FOLLOW_TAXI_TIMER >= FOLLOW_TAXI_TIMER_INTERVAL and DO_FOLLOW == True:
+        try:
+            if FOLLOW_ID is not None:
+                row = taxi_list[FOLLOW_ID].CurrentXPos
+                col = taxi_list[FOLLOW_ID].CurrentYPos
+                row = max(0, min(GRID_SIZE-1, row))
+                col = max(0, min(GRID_SIZE-1, col))
+                cell_size = BASE_CELL_SIZE * zoom
+                camera_x = col * cell_size
+                camera_y = row * cell_size
+        except ValueError:
+            print("Invalid Taxi Number!")
+        FOLLOW_TAXI_TIMER -= FOLLOW_TAXI_TIMER_INTERVAL 
 
     pygame.display.flip()  # Update screen 
 
