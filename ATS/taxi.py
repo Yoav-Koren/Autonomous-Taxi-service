@@ -20,7 +20,7 @@ class Taxi:
         return self.OwnPassenger is not None 
     
     def has_passenger_picked_up(self): # Checks if the taxis location is the same as the passenger because that would mean they pick them up
-        if (self.CurrentXPos == self.OwnPassenger.CurrentXPos and self.CurrentYPos == self.OwnPassenger.CurrentYPos) and self.PickedUpPassenger == False:
+        if (self.CurrentXPos == self.OwnPassenger.CurrentXPos and self.CurrentYPos == self.OwnPassenger.CurrentYPos) and self.PickedUpPassenger == False and self.OwnPassenger is not None:
             if self.CurrentXPos == self.OwnPassenger.CurrentXPos and self.CurrentYPos == self.OwnPassenger.CurrentYPos:
                 print("Taxi ", self.ID, " has reached passenger at:", self.OwnPassenger.get_current_point())
                 self.PickedUpPassenger = True
@@ -124,7 +124,7 @@ class Taxi:
             Manhatten_Distance = abs(self.CurrentXPos - self.OwnPassenger.EndXPos) + abs(self.CurrentYPos - self.OwnPassenger.EndYPos)
             print("Taxi:",self.ID," has reached the drop off at",self.OwnPassenger.get_end_point())
             self.has_order_finished() # Checks if the passenger has reached the end point and drops them off
-            
+
                         
   
 

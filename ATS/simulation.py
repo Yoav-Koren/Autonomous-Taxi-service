@@ -248,12 +248,13 @@ while running:
 
     # Checks every second if there are passengers in the que, if there are, we check the distance to the first passenger in the que, and assign the closes taxi to him, and also removing them from the que
     if ASSIGN_TAXI_TIMER >= ASSIGN_TAXI_TIMER_INTERVAL: 
+        print("Que: ",len(passenger_que))
         if len(passenger_que) > 0: # Checks if the que is not empty
             empty_taxi_list : list[Taxi]= [] 
             for taxi in taxi_list:
                 if taxi.has_passenger_assigned() == False:
                     empty_taxi_list.append(taxi) # Creates and adds all empty taxis to the list because we dont need to calculate the distance to occupied taxis
-            print("Que: ",len(passenger_que))
+            
             print("Empty Taxis: ",len(empty_taxi_list))
             if len(empty_taxi_list) > 0: 
                 closest_taxi:Taxi  = empty_taxi_list[0] # Stores the closest taxi as the first one just so i dont have to deal with Null
@@ -285,11 +286,29 @@ while running:
             if FOLLOW_ID is not None:
                 row = taxi_list[FOLLOW_ID].CurrentXPos
                 col = taxi_list[FOLLOW_ID].CurrentYPos
-                row = max(0, min(GRID_SIZE-1, row))
-                col = max(0, min(GRID_SIZE-1, col))
+
+                # Clamp taxi position to grid
+                row = max(0, min(GRID_SIZE - 1, row))
+                col = max(0, min(GRID_SIZE - 1, col))
+
+                # Cell size with zoom applied
                 cell_size = BASE_CELL_SIZE * zoom
-                camera_x = col * cell_size
-                camera_y = row * cell_size
+
+                # World size of the map
+                map_width = GRID_SIZE * cell_size
+                map_height = GRID_SIZE * cell_size
+
+                # Taxi world position (center of its cell)
+                taxi_world_x = col * cell_size + cell_size / 2
+                taxi_world_y = row * cell_size + cell_size / 2
+
+                # Camera position (top-left of the screen in world coords)
+                camera_x = taxi_world_x - SCREEN_W / 2
+                camera_y = taxi_world_y - SCREEN_H / 2
+
+                # Clamp camera to map bounds
+                camera_x = max(0, min(map_width - SCREEN_W, camera_x))
+                camera_y = max(0, min(map_height - SCREEN_H, camera_y))
         except ValueError:
             print("Invalid Taxi Number!")
         FOLLOW_TAXI_TIMER -= FOLLOW_TAXI_TIMER_INTERVAL 
