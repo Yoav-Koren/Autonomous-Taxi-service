@@ -103,7 +103,7 @@ class Simulation:
 
         # Listens to keyboard for keys for camera movement
         keys = pygame.key.get_pressed()
-        move = Constant.CAMERA_SPEED * self.dt  # How many pixels to move camera based on delta time
+        move = Constant.CAMERA_speed * self.dt  # How many pixels to move camera based on delta time
 
         if keys[pygame.K_a]:  # Move left
             self.camera_x -= move
@@ -148,7 +148,7 @@ class Simulation:
             self.camera_y = max(0, min(self.camera_y, Constant.GRID_SIZE * Constant.BASE_CELL_SIZE * self.zoom))
 
                 
-            self.screen.fill(Constant.BG_COLOR)  # Clear screen
+            self.screen.fill(Constant.BG_color)  # Clear screen
             self.cell_size = Constant.BASE_CELL_SIZE * self.zoom  # Calculates cell size based on current zoom
 
             # Checks how many and which cells are currently visible
@@ -172,7 +172,7 @@ class Simulation:
                     
                     # Draw grid lines if zoomed in enough
                     if self.cell_size >= 5:
-                        pygame.draw.rect(self.screen, Constant.GRID_COLOR, rect, 1)
+                        pygame.draw.rect(self.screen, Constant.GRID_color, rect, 1)
                         self._taxi_tile_rendering(row, col, x, y)
                         self._passenger_tile_rendering(row, col, x, y)
                         self._passenger_end_point_tile_rendering(row, col, x, y)
@@ -184,7 +184,7 @@ class Simulation:
             if passenger.get_end_point() == (row,col):
                 pygame.draw.polygon(        
                             self.screen,
-                            passenger.Color,
+                            passenger.color,
                             [
                                 (x + self.cell_size * 0.5, y),                    
                                 (x + self.cell_size * 0.6, y + self.cell_size * 0.35),
@@ -200,10 +200,10 @@ class Simulation:
                         )
         for taxi in self.taxi_list: # Checks for passengers
             if taxi.has_passenger_assigned():  
-                if taxi.OwnPassenger.get_end_point() == (row,col):
+                if taxi.own_passenger.get_end_point() == (row,col):
                     pygame.draw.polygon(        
                                 self.screen,
-                                taxi.OwnPassenger.Color,
+                                taxi.own_passenger.color,
                                 [
                                     (x + self.cell_size * 0.5, y),                    
                                     (x + self.cell_size * 0.6, y + self.cell_size * 0.35),
@@ -222,18 +222,18 @@ class Simulation:
     def _passenger_tile_rendering(self, row, col, x, y):
         for passenger in self.passenger_que: # Checks for unassigned passengers
             if passenger.get_current_point() == (row,col):
-                pygame.draw.circle(self.screen, passenger.Color, (x + self.cell_size // 2, y + self.cell_size // 2), self.cell_size // 2)
+                pygame.draw.circle(self.screen, passenger.color, (x + self.cell_size // 2, y + self.cell_size // 2), self.cell_size // 2)
         for taxi in self.taxi_list: # Checks for assigned passengers
            if taxi.has_passenger_assigned():
-                if taxi.OwnPassenger.get_current_point() == (row,col):
-                    pygame.draw.circle(self.screen, taxi.OwnPassenger.Color, (x + self.cell_size // 2, y + self.cell_size // 2), self.cell_size // 2)
+                if taxi.own_passenger.get_current_point() == (row,col):
+                    pygame.draw.circle(self.screen, taxi.own_passenger.color, (x + self.cell_size // 2, y + self.cell_size // 2), self.cell_size // 2)
 
     # Checks if the cell is a passenger and draws a circle
     def _taxi_tile_rendering(self, row, col, x, y):
         for taxi in self.taxi_list: 
             if taxi.get_current_position() == (row, col):
                 rect_taxi = pygame.Rect(x, y, self.cell_size, self.cell_size)
-                pygame.draw.rect(self.screen, taxi.Color, rect_taxi)
+                pygame.draw.rect(self.screen, taxi.color, rect_taxi)
 
     def _run_timers(self):
         self._spawn_new_passenger()
@@ -253,15 +253,15 @@ class Simulation:
             empty_taxi_list = self._grab_empty_taxis()
             if len(empty_taxi_list) > 0: 
                 closest_taxi:Taxi  = empty_taxi_list[0] # Stores the closest taxi as the first one just so i dont have to deal with Null
-                current_smallest_distance = Utils._calculate_manhatten_distance(closest_taxi.CurrentXPos, 
-                                                                               self.passenger_que[0].CurrentXPos,
-                                                                               closest_taxi.CurrentYPos, 
-                                                                               self.passenger_que[0].CurrentYPos) # Calculates the distance and stores the distance of the closest taxi 
+                current_smallest_distance = Utils.calculate_manhatten_distance(closest_taxi.current_x_pos, 
+                                                                               self.passenger_que[0].current_x_pos,
+                                                                               closest_taxi.current_y_pos, 
+                                                                               self.passenger_que[0].current_y_pos) # Calculates the distance and stores the distance of the closest taxi 
                 closest_taxi = self._calculate_closest_taxi(empty_taxi_list, current_smallest_distance)
-                if self.taxi_list[closest_taxi.ID].OwnPassenger is None:
+                if self.taxi_list[closest_taxi.ID].own_passenger is None:
                     print("Closest Taxi: ",closest_taxi.ID, closest_taxi.get_current_position())
                     empty_taxi_list.clear() # Clears all the taxis as for next check
-                    self.taxi_list[closest_taxi.ID].OwnPassenger = self.passenger_que[0] # Asigns the closest taxi this new passenger
+                    self.taxi_list[closest_taxi.ID].own_passenger = self.passenger_que[0] # Asigns the closest taxi this new passenger
                     self.passenger_que.pop() # Removes passenger from que as it has been handled
             self.assign_taxi_timer -= Constant.ASSIGN_TAXI_TIMER_INTERVAL 
 
@@ -269,10 +269,10 @@ class Simulation:
         closest_taxi = empty_taxi_list[0]
         for empty_taxi  in empty_taxi_list: # For each empty Taxi i run a check to see if the distance between the passenger and this empty taxi is smaller than the one already stored
             # Calculates the distance to the passenger
-            distance = Utils._calculate_manhatten_distance(empty_taxi.CurrentXPos,
-                                                                  self.passenger_que[0].CurrentXPos,
-                                                                  empty_taxi.CurrentYPos, 
-                                                                  self.passenger_que[0].CurrentYPos)
+            distance = Utils.calculate_manhatten_distance(empty_taxi.current_x_pos,
+                                                                  self.passenger_que[0].current_x_pos,
+                                                                  empty_taxi.current_y_pos, 
+                                                                  self.passenger_que[0].current_y_pos)
             print("Taxi: ",empty_taxi.ID, empty_taxi.get_current_position()) 
             print("Distance to Passenger: ",distance)
             if current_smallest_distance > distance: # If the current closest taxi is actually farther than the the distance of the newly calculated one i just replace the closest taxi and its distance with the closest one
@@ -312,8 +312,8 @@ class Simulation:
         if self.follow_taxi_timer >= Constant.FOLLOW_TAXI_TIMER_INTERVAL and self.do_follow == True:
             try:
                 if self.follow_id is not None:
-                    row = self.taxi_list[self.follow_id].CurrentXPos
-                    col = self.taxi_list[self.follow_id].CurrentYPos
+                    row = self.taxi_list[self.follow_id].current_x_pos
+                    col = self.taxi_list[self.follow_id].current_y_pos
 
                     # Clamp taxi position to grid
                     row = max(0, min(Constant.GRID_SIZE - 1, row))

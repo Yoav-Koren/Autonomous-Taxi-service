@@ -16,13 +16,13 @@ class Constant:
     MAX_ZOOM = 4.0  
 
     # Camera move speed                
-    CAMERA_SPEED = 800              
+    CAMERA_speed = 800              
     
     # Grid line color 
-    GRID_COLOR = (80, 80, 80)    
+    GRID_color = (80, 80, 80)    
 
     # Background color (dark gray)
-    BG_COLOR = (25, 25, 25)   
+    BG_color = (25, 25, 25)   
 
     # Taxi number
     TAXI_AMOUNT = 10
