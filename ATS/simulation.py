@@ -40,7 +40,7 @@ class Simulation:
         
         # Starting Taxi and Passenger arrays
         self.taxi_list: list[Taxi] =[]
-        self.passenger_que: list[Passenger] =[]
+        self.passenger_queue: list[Passenger] =[]
 
         # Simulation loop
         self.running = True
@@ -103,7 +103,7 @@ class Simulation:
 
         # Listens to keyboard for keys for camera movement
         keys = pygame.key.get_pressed()
-        move = Constant.CAMERA_speed * self.dt  # How many pixels to move camera based on delta time
+        move = Constant.CAMERA_SPEED * self.dt  # How many pixels to move camera based on delta time
 
         if keys[pygame.K_a]:  # Move left
             self.camera_x -= move
@@ -148,7 +148,7 @@ class Simulation:
             self.camera_y = max(0, min(self.camera_y, Constant.GRID_SIZE * Constant.BASE_CELL_SIZE * self.zoom))
 
                 
-            self.screen.fill(Constant.BG_color)  # Clear screen
+            self.screen.fill(Constant.BG_COLOR)  # Clear screen
             self.cell_size = Constant.BASE_CELL_SIZE * self.zoom  # Calculates cell size based on current zoom
 
             # Checks how many and which cells are currently visible
@@ -172,7 +172,7 @@ class Simulation:
                     
                     # Draw grid lines if zoomed in enough
                     if self.cell_size >= 5:
-                        pygame.draw.rect(self.screen, Constant.GRID_color, rect, 1)
+                        pygame.draw.rect(self.screen, Constant.GRID_COLOR, rect, 1)
                         self._taxi_tile_rendering(row, col, x, y)
                         self._passenger_tile_rendering(row, col, x, y)
                         self._passenger_end_point_tile_rendering(row, col, x, y)
@@ -180,7 +180,7 @@ class Simulation:
 
     # Checks if the cell is a passenger end point and draws a star
     def _passenger_end_point_tile_rendering(self, row, col, x, y):
-        for passenger in self.passenger_que: # Checks for unassigned passengers
+        for passenger in self.passenger_queue: # Checks for unassigned passengers
             if passenger.get_end_point() == (row,col):
                 pygame.draw.polygon(        
                             self.screen,
@@ -220,7 +220,7 @@ class Simulation:
 
     # Checks if the cell is a taxi position cell and paints it
     def _passenger_tile_rendering(self, row, col, x, y):
-        for passenger in self.passenger_que: # Checks for unassigned passengers
+        for passenger in self.passenger_queue: # Checks for unassigned passengers
             if passenger.get_current_point() == (row,col):
                 pygame.draw.circle(self.screen, passenger.color, (x + self.cell_size // 2, y + self.cell_size // 2), self.cell_size // 2)
         for taxi in self.taxi_list: # Checks for assigned passengers
@@ -236,6 +236,7 @@ class Simulation:
                 pygame.draw.rect(self.screen, taxi.color, rect_taxi)
 
     def _run_timers(self):
+        self._update_timers()
         self._spawn_new_passenger()
         self._assign_passengers()
         self._update_all_taxis()
@@ -243,26 +244,26 @@ class Simulation:
 
 
 
-    # Checks every second if there are passengers in the que, 
-    # if there are, we check the distance to the first passenger in the que, 
+    # Checks every second if there are passengers in the queue, 
+    # if there are, we check the distance to the first passenger in the queue, 
     # and assign the closes taxi to him,
-    # and also removing them from the que
+    # and also removing them from the queue
     def _assign_passengers(self):    
         if self.assign_taxi_timer >= Constant.ASSIGN_TAXI_TIMER_INTERVAL: 
-            print("Que: ",len(self.passenger_que))
+            print("queue: ",len(self.passenger_queue))
             empty_taxi_list = self._grab_empty_taxis()
             if len(empty_taxi_list) > 0: 
                 closest_taxi:Taxi  = empty_taxi_list[0] # Stores the closest taxi as the first one just so i dont have to deal with Null
                 current_smallest_distance = Utils.calculate_manhatten_distance(closest_taxi.current_x_pos, 
-                                                                               self.passenger_que[0].current_x_pos,
+                                                                               self.passenger_queue[0].current_x_pos,
                                                                                closest_taxi.current_y_pos, 
-                                                                               self.passenger_que[0].current_y_pos) # Calculates the distance and stores the distance of the closest taxi 
+                                                                               self.passenger_queue[0].current_y_pos) # Calculates the distance and stores the distance of the closest taxi 
                 closest_taxi = self._calculate_closest_taxi(empty_taxi_list, current_smallest_distance)
                 if self.taxi_list[closest_taxi.ID].own_passenger is None:
                     print("Closest Taxi: ",closest_taxi.ID, closest_taxi.get_current_position())
                     empty_taxi_list.clear() # Clears all the taxis as for next check
-                    self.taxi_list[closest_taxi.ID].own_passenger = self.passenger_que[0] # Asigns the closest taxi this new passenger
-                    self.passenger_que.pop() # Removes passenger from que as it has been handled
+                    self.taxi_list[closest_taxi.ID].own_passenger = self.passenger_queue[0] # Asigns the closest taxi this new passenger
+                    self.passenger_queue.pop() # Removes passenger from queue as it has been handled
             self.assign_taxi_timer -= Constant.ASSIGN_TAXI_TIMER_INTERVAL 
 
     def _calculate_closest_taxi(self, empty_taxi_list, current_smallest_distance) -> Taxi:
@@ -270,9 +271,9 @@ class Simulation:
         for empty_taxi  in empty_taxi_list: # For each empty Taxi i run a check to see if the distance between the passenger and this empty taxi is smaller than the one already stored
             # Calculates the distance to the passenger
             distance = Utils.calculate_manhatten_distance(empty_taxi.current_x_pos,
-                                                                  self.passenger_que[0].current_x_pos,
+                                                                  self.passenger_queue[0].current_x_pos,
                                                                   empty_taxi.current_y_pos, 
-                                                                  self.passenger_que[0].current_y_pos)
+                                                                  self.passenger_queue[0].current_y_pos)
             print("Taxi: ",empty_taxi.ID, empty_taxi.get_current_position()) 
             print("Distance to Passenger: ",distance)
             if current_smallest_distance > distance: # If the current closest taxi is actually farther than the the distance of the newly calculated one i just replace the closest taxi and its distance with the closest one
@@ -291,7 +292,7 @@ class Simulation:
     # Creates and adds all empty taxis to the list because we dont need to calculate the distance to occupied taxis
     def _grab_empty_taxis(self):
         empty_taxi_list : list[Taxi]= [] 
-        if len(self.passenger_que) > 0: # Checks if the que is not empty
+        if len(self.passenger_queue) > 0: # Checks if the queue is not empty
             for taxi in self.taxi_list:
                 if taxi.has_passenger_assigned() == False:
                     empty_taxi_list.append(taxi) 
@@ -302,8 +303,8 @@ class Simulation:
     def _spawn_new_passenger(self):
         if self.new_passenger_spawn_timer >= Constant.NEW_PASSENGER_TIMER_INTERVAL:   
             temp_passenger = Passenger(self.passenger_id_incrementor) # Creates a new passenger
-            self.passenger_que.append(temp_passenger) # Adds the passenger to the que
-            print("Que: ",len(self.passenger_que))
+            self.passenger_queue.append(temp_passenger) # Adds the passenger to the queue
+            print("queue: ",len(self.passenger_queue))
             self.passenger_id_incrementor += 1 # Id increment
             self.new_passenger_spawn_timer -= Constant.NEW_PASSENGER_TIMER_INTERVAL  # subtract instead of reset to prevent drift
 
@@ -345,8 +346,7 @@ class Simulation:
         self.pygame_setup()
         self.create_taxis()
         while self.running:
-            self.dt = self.clock.tick(60) / 1000.0 # Delta Time so events are fps driven not clock driven
-            self._update_timers()
+            self.dt = (self.clock.tick(60) / 1000.0) * Constant.TIME_SCALE # Delta Time so events are fps driven not clock driven
             self._check_pygame_events()
             self._check_keyboard_events()
             self._rending_loop()

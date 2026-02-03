@@ -1,13 +1,14 @@
 import random
 import math
+from constants import Constant
 from passenger import Passenger
 from utils import Utils
 
 class Taxi:
-    def __init__(self,ID ,current_x_pos = None ,current_y_pos = None , color = None , speed = 20, is_driving = False, picked_up_passenger = False ,own_passenger : Passenger = None):
+    def __init__(self,ID ,current_x_pos = None ,current_y_pos = None , color = None , speed = Constant.TAXI_SPEED, is_driving = False, picked_up_passenger = False ,own_passenger : Passenger = None):
         self.ID = ID
-        self.current_x_pos = random.randint(0,20000)
-        self.current_y_pos = random.randint(0,20000)
+        self.current_x_pos = random.randint(0,Constant.GRID_SIZE)
+        self.current_y_pos = random.randint(0,Constant.GRID_SIZE)
         self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
         self.speed = speed
         self.is_driving = is_driving
