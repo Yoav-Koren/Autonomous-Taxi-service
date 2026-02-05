@@ -7,8 +7,8 @@ from utils import Utils
 class Taxi:
     def __init__(self,ID ,current_x_pos = None ,current_y_pos = None , color = None , speed = Constant.TAXI_SPEED, is_driving = False, picked_up_passenger = False ,own_passenger : Passenger = None):
         self.ID = ID
-        self.current_x_pos = random.randint(0,Constant.GRID_SIZE)
-        self.current_y_pos = random.randint(0,Constant.GRID_SIZE)
+        self.current_x_pos = random.randint(0,Constant.GRID_SIZE-1)
+        self.current_y_pos = random.randint(0,Constant.GRID_SIZE-1)
         self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
         self.speed = speed
         self.is_driving = is_driving
@@ -61,13 +61,19 @@ class Taxi:
                 # If X distance is bigger:
                 move_distance_clamp = min(self.speed, distance_x) # Returns which every is smaller, speed or distance to X as to make sure i dont overshoot
                 move_distance = max(-self.speed, move_distance_clamp) # Returns which ever is greater, speed in the oppsite direcation or negetive speed, -speed ≤ movement ≤ speed
-                self.current_x_pos += move_distance
+                if (self.current_x_pos + move_distance) > Constant.GRID_SIZE:
+                    self.current_x_pos = Constant.GRID_SIZE - 1
+                else:
+                    self.current_x_pos += move_distance
                 print("Taxi ", self.ID, " Moved ",move_distance, " along the X axis and has reached: ",self.get_current_position())
             else: 
                 # If Y distance is bigger:
                 move_distance_clamp = min(self.speed, distance_y)
                 move_distance = max(-self.speed, move_distance_clamp)
-                self.current_y_pos+= move_distance
+                if (self.current_y_pos + move_distance) > Constant.GRID_SIZE:
+                    self.current_y_pos = Constant.GRID_SIZE  - 1
+                else:
+                    self.current_y_pos += move_distance
                 print("Taxi ", self.ID, " Moved ",move_distance, " along the Y axis and has reached: ",self.get_current_position())
             manhatten_distance = Utils.calculate_manhatten_distance(self.current_x_pos,
                                                                     self.own_passenger.current_x_pos,
@@ -83,15 +89,24 @@ class Taxi:
                 # If X distance is bigger:
                 move_distance_clamp = min(self.speed, distance_x) # Returns which every is smaller, speed or distance to X as to make sure i dont overshoot
                 move_distance = max(-self.speed, move_distance_clamp) # Returns which ever is greater, speed in the oppsite direcation or negetive speed, -speed ≤ movement ≤ speed
-                self.current_x_pos += move_distance
-                self.own_passenger.current_x_pos += move_distance
+                if (self.current_x_pos + move_distance) >= Constant.GRID_SIZE:
+                    self.current_x_pos = Constant.GRID_SIZE - 1
+                    self.own_passenger.current_x_pos = Constant.GRID_SIZE -1
+                else:
+                    self.current_x_pos += move_distance
+                    self.own_passenger.current_x_pos += move_distance
                 print("Taxi ", self.ID, " Moved ",move_distance, " along the X axis and has reached: ",self.get_current_position())
             else: 
                 # If Y distance is bigger:
                 move_distance_clamp = min(self.speed, distance_y)
                 move_distance = max(-self.speed, move_distance_clamp)
-                self.current_y_pos+= move_distance
-                self.own_passenger.current_y_pos += move_distance
+                if (self.current_y_pos + move_distance) >= Constant.GRID_SIZE:
+                    self.current_y_pos = Constant.GRID_SIZE-1
+                    self.own_passenger.current_y_pos = Constant.GRID_SIZE-1
+                else:
+                    self.current_y_pos += move_distance
+                    self.own_passenger.current_y_pos += move_distance
+                
                 print("Taxi ", self.ID, " Moved ",move_distance, " along the Y axis and has reached: ",self.get_current_position())
             manhatten_distance =  Utils.calculate_manhatten_distance(self.current_x_pos,
                                                                      self.own_passenger.end_x_pos,
