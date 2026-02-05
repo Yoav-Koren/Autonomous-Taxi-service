@@ -72,13 +72,8 @@ class Simulation:
             temp = Taxi(i)
             print(temp.ID, temp.get_current_position())
             self.taxi_list.append(temp)  
-     
-    # Updates the timers
-    def _update_timers(self):
-            self.new_passenger_spawn_timer += self.dt
-            self.assign_taxi_timer +=  self.dt
-            self.drive_taxi_timer +=  self.dt
-            self.follow_taxi_timer +=  self.dt
+    
+
 
     def _check_pygame_events(self):
             # Events:
@@ -236,10 +231,10 @@ class Simulation:
                 pygame.draw.rect(self.screen, taxi.color, rect_taxi)
 
     def _run_timers(self):
-        self._update_timers()
+     
         self._spawn_new_passenger()
-        self._assign_passengers()
         self._update_all_taxis()
+        self._assign_passengers()
         self._follow_camera_loop()
 
 
@@ -251,6 +246,8 @@ class Simulation:
     def _assign_passengers(self):    
         if self.assign_taxi_timer >= Constant.ASSIGN_TAXI_TIMER_INTERVAL: 
             print("queue: ",len(self.passenger_queue))
+            for passenger in self.passenger_queue:
+                print(passenger.get_current_point())
             empty_taxi_list = self._grab_empty_taxis()
             if len(empty_taxi_list) > 0: 
                 closest_taxi:Taxi  = empty_taxi_list[0] # Stores the closest taxi as the first one just so i dont have to deal with Null
@@ -263,7 +260,7 @@ class Simulation:
                     print("Closest Taxi: ",closest_taxi.ID, closest_taxi.get_current_position())
                     empty_taxi_list.clear() # Clears all the taxis as for next check
                     self.taxi_list[closest_taxi.ID].own_passenger = self.passenger_queue[0] # Asigns the closest taxi this new passenger
-                    self.passenger_queue.pop() # Removes passenger from queue as it has been handled
+                    self.passenger_queue.pop(0) # Removes passenger from queue as it has been handled
             self.assign_taxi_timer -= Constant.ASSIGN_TAXI_TIMER_INTERVAL 
 
     def _calculate_closest_taxi(self, empty_taxi_list, current_smallest_distance) -> Taxi:
@@ -347,6 +344,10 @@ class Simulation:
         self.create_taxis()
         while self.running:
             self.dt = (self.clock.tick(60) / 1000.0) * Constant.TIME_SCALE # Delta Time so events are fps driven not clock driven
+            self.new_passenger_spawn_timer += self.dt
+            self.assign_taxi_timer +=  self.dt
+            self.drive_taxi_timer +=  self.dt
+            self.follow_taxi_timer +=  self.dt           
             self._check_pygame_events()
             self._check_keyboard_events()
             self._rending_loop()
