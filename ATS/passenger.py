@@ -11,6 +11,8 @@ class Passenger:
         self.current_y_pos = random.randint(0,Constant.GRID_SIZE-1)
         self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
         self.max_distance = random.randint(1,Constant.MAX_PASSENGER_DISTANCE) # Generates a max distance for the end point
+        while self.max_distance == 1 :
+            self.max_distance = random.randint(1,Constant.MAX_PASSENGER_DISTANCE) # Regenerates max distance if distance is 1 
         self._generate_endpoint()
     
     def get_current_point(self):
